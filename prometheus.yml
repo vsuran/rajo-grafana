@@ -1,0 +1,47 @@
+global:
+  scrape_interval: 30s
+  evaluation_interval: 30s
+
+scrape_configs:
+  - job_name: prometheus
+    static_configs:
+      - targets:
+          - prometheus:9090
+
+  - job_name: fortigate
+    metrics_path: /probe
+    static_configs:
+      - targets:
+          - https://192.168.9.1:8443
+          - https://192.168.8.1:8443
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: __param_target
+      - source_labels: [__param_target]
+        target_label: instance
+      - target_label: __address__
+        replacement: fortigate_exporter:9710
+
+  - job_name: 'cisco_snmp'
+    metrics_path: /snmp
+    params:
+      module: [if_mib]
+      auth: [public_v2]
+
+    file_sd_configs:
+      - files:
+          - /etc/prometheus/targets/cisco-switches.yml
+        refresh_interval: 1m
+
+    relabel_configs:
+      # Take the target from file_sd and pass it as ?target=
+      - source_labels: [__address__]
+        target_label: __param_target
+
+      # Set instance label = real switch IP
+      - source_labels: [__param_target]
+        target_label: instance
+
+      # Replace scrape address with snmp_exporter
+      - target_label: __address__
+        replacement: snmp_exporter:9116
