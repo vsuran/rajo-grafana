@@ -1,0 +1,73 @@
+services:
+  fortigate_exporter:
+    image: vladosur/fortigate-exporter:latest
+    container_name: fortigate_exporter
+    entrypoint:
+      - /bin/fortigate_exporter
+    command:
+      - "-auth-file=/config/fortigate-key.yaml"
+      - "-listen=:9710"
+      - "-insecure"
+    volumes:
+      - ./fortigate-key.yaml:/config/fortigate-key.yaml:ro
+    ports:
+      - "9710:9710"
+    restart: unless-stopped
+    networks:
+      - monitoring
+  snmp_exporter:
+    image: prom/snmp-exporter:v0.25.0
+    container_name: snmp_exporter
+    command:
+      - "--config.file=/etc/snmp_exporter/snmp.yml"
+    volumes:
+      - ./prometheus/snmp/snmp.yml:/etc/snmp_exporter/snmp.yml:ro
+    ports:
+      - "9116:9116"
+    restart: unless-stopped
+    networks:
+      - monitoring
+  prometheus:
+    image: prom/prometheus:v2.53.1
+    container_name: prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--web.enable-lifecycle"
+    volumes:
+      - ./prometheus:/etc/prometheus
+      - prometheus-data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    depends_on:
+      - fortigate_exporter
+    networks:
+      - monitoring
+
+  grafana:
+    image: grafana/grafana:11.1.0
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_USERS_DEFAULT_THEME=dark
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    depends_on:
+      - prometheus
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge
+
+volumes:
+  prometheus-data:
+  grafana-data:

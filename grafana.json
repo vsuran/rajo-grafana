@@ -1,0 +1,393 @@
+{
+  "__inputs": [
+    {
+      "name": "DS_PROMETHEUS",
+      "label": "Prometheus",
+      "description": "",
+      "type": "datasource",
+      "pluginId": "prometheus",
+      "pluginName": "Prometheus"
+    }
+  ],
+  "annotations": { "list": [] },
+  "description": "Cisco Switch Monitoring",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [
+            { "options": { "0": { "color": "red", "text": "DOWN" }, "1": { "color": "green", "text": "UP" } }, "type": "value" }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "green", "value": 1 }] }
+        }
+      },
+      "gridPos": { "h": 3, "w": 3, "x": 0, "y": 0 },
+      "id": 1,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
+      "targets": [{ "expr": "up{job=\"cisco_snmp\", instance=\"$instance\"}", "instant": true, "refId": "A" }],
+      "title": "Status",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "red", "value": null }, { "color": "yellow", "value": 3600 }, { "color": "green", "value": 86400 }] },
+          "unit": "dtdurations"
+        }
+      },
+      "gridPos": { "h": 3, "w": 3, "x": 3, "y": 0 },
+      "id": 2,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
+      "targets": [{ "expr": "sysUpTime{job=\"cisco_snmp\", instance=\"$instance\"} / 100", "instant": true, "refId": "A" }],
+      "title": "Uptime",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "max": 100,
+          "min": 0,
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 60 }, { "color": "orange", "value": 80 }, { "color": "red", "value": 90 }] },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 3, "w": 3, "x": 6, "y": 0 },
+      "id": 3,
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "showThresholdLabels": false, "showThresholdMarkers": true },
+      "targets": [{ "expr": "avg(ciscoCpu5sec{job=\"cisco_snmp\", instance=\"$instance\"}) or vector(0)", "instant": true, "refId": "A" }],
+      "title": "CPU",
+      "type": "gauge"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "max": 100,
+          "min": 0,
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 70 }, { "color": "orange", "value": 85 }, { "color": "red", "value": 95 }] },
+          "unit": "percent"
+        }
+      },
+      "gridPos": { "h": 3, "w": 3, "x": 9, "y": 0 },
+      "id": 4,
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"] }, "showThresholdLabels": false, "showThresholdMarkers": true },
+      "targets": [{ "expr": "100 * sum(ciscoMemPoolUsed{job=\"cisco_snmp\", instance=\"$instance\"}) / (sum(ciscoMemPoolUsed{job=\"cisco_snmp\", instance=\"$instance\"}) + sum(ciscoMemPoolFree{job=\"cisco_snmp\", instance=\"$instance\"}))", "instant": true, "refId": "A" }],
+      "title": "Memory",
+      "type": "gauge"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "description": "Maximum temperature from all sensors",
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 0,
+          "mappings": [{ "options": { "match": "null", "result": { "text": "N/A" } }, "type": "special" }],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 50 }, { "color": "orange", "value": 65 }, { "color": "red", "value": 80 }] },
+          "unit": "celsius"
+        }
+      },
+      "gridPos": { "h": 3, "w": 3, "x": 12, "y": 0 },
+      "id": 5,
+      "options": { "colorMode": "value", "graphMode": "area", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
+      "targets": [{ "expr": "max(ciscoEnvMonTemperatureStatusValue{job=\"cisco_snmp\", instance=\"$instance\"}) or vector(0)", "instant": true, "refId": "A" }],
+      "title": "Temp",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }] }
+        }
+      },
+      "gridPos": { "h": 3, "w": 3, "x": 15, "y": 0 },
+      "id": 6,
+      "options": { "colorMode": "value", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
+      "targets": [{ "expr": "count(ifOperStatus{job=\"cisco_snmp\", instance=\"$instance\"} == 1) or vector(0)", "instant": true, "refId": "A" }],
+      "title": "Ports Up",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [{ "options": { "match": "null", "result": { "color": "green", "text": "0" } }, "type": "special" }],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 5 }] }
+        }
+      },
+      "gridPos": { "h": 3, "w": 3, "x": 18, "y": 0 },
+      "id": 7,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
+      "targets": [{ "expr": "count(ifOperStatus{job=\"cisco_snmp\", instance=\"$instance\"} == 2) or vector(0)", "instant": true, "refId": "A" }],
+      "title": "Ports Down",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "mappings": [{ "options": { "match": "null", "result": { "color": "green", "text": "0" } }, "type": "special" }],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 1 }, { "color": "red", "value": 3 }] }
+        }
+      },
+      "gridPos": { "h": 3, "w": 3, "x": 21, "y": 0 },
+      "id": 8,
+      "options": { "colorMode": "background", "graphMode": "none", "justifyMode": "center", "reduceOptions": { "calcs": ["lastNotNull"] }, "textMode": "value" },
+      "targets": [{ "expr": "count((rate(ifInErrors{job=\"cisco_snmp\", instance=\"$instance\"}[5m]) + rate(ifOutErrors{job=\"cisco_snmp\", instance=\"$instance\"}[5m])) > 0) or vector(0)", "instant": true, "refId": "A" }],
+      "title": "Errors",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "gradientMode": "opacity", "lineInterpolation": "smooth", "lineWidth": 1, "showPoints": "never", "spanNulls": false, "stacking": { "mode": "none" } },
+          "min": 0,
+          "unit": "bps"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 3 },
+      "id": 10,
+      "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "right", "showLegend": true, "sortBy": "Last *", "sortDesc": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "expr": "rate(ifHCInOctets{job=\"cisco_snmp\", instance=\"$instance\", ifIndex=~\"$ifindex\"}[$__rate_interval]) * 8\n* on(instance, ifIndex) group_left(ifDescr)\n(ifDescr{job=\"cisco_snmp\", instance=\"$instance\"} * 0 + 1)", "legendFormat": "{{ ifDescr }}", "refId": "A" }],
+      "title": "Inbound Traffic",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "line", "fillOpacity": 10, "gradientMode": "opacity", "lineInterpolation": "smooth", "lineWidth": 1, "showPoints": "never", "spanNulls": false, "stacking": { "mode": "none" } },
+          "min": 0,
+          "unit": "bps"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 3 },
+      "id": 11,
+      "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "right", "showLegend": true, "sortBy": "Last *", "sortDesc": true }, "tooltip": { "mode": "multi", "sort": "desc" } },
+      "targets": [{ "expr": "rate(ifHCOutOctets{job=\"cisco_snmp\", instance=\"$instance\", ifIndex=~\"$ifindex\"}[$__rate_interval]) * 8\n* on(instance, ifIndex) group_left(ifDescr)\n(ifDescr{job=\"cisco_snmp\", instance=\"$instance\"} * 0 + 1)", "legendFormat": "{{ ifDescr }}", "refId": "A" }],
+      "title": "Outbound Traffic",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "min": 0,
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 500000000 }, { "color": "red", "value": 900000000 }] },
+          "unit": "bps"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 11 },
+      "id": 15,
+      "options": { "displayMode": "gradient", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"] }, "showUnfilled": true },
+      "targets": [{ "expr": "topk(10,\n  rate(ifHCInOctets{job=\"cisco_snmp\", instance=\"$instance\"}[$__rate_interval]) * 8\n  * on(instance, ifIndex) group_left(ifDescr)\n  (ifDescr{job=\"cisco_snmp\", instance=\"$instance\"} * 0 + 1)\n)", "legendFormat": "{{ ifDescr }}", "refId": "A" }],
+      "title": "Top 10 Inbound",
+      "type": "bargauge"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "min": 0,
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 500000000 }, { "color": "red", "value": 900000000 }] },
+          "unit": "bps"
+        }
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 11 },
+      "id": 16,
+      "options": { "displayMode": "gradient", "orientation": "horizontal", "reduceOptions": { "calcs": ["lastNotNull"] }, "showUnfilled": true },
+      "targets": [{ "expr": "topk(10,\n  rate(ifHCOutOctets{job=\"cisco_snmp\", instance=\"$instance\"}[$__rate_interval]) * 8\n  * on(instance, ifIndex) group_left(ifDescr)\n  (ifDescr{job=\"cisco_snmp\", instance=\"$instance\"} * 0 + 1)\n)", "legendFormat": "{{ ifDescr }}", "refId": "A" }],
+      "title": "Top 10 Outbound",
+      "type": "bargauge"
+    },
+    {
+      "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": { "fillOpacity": 100, "lineWidth": 0, "spanNulls": false },
+          "mappings": [
+            { "options": { "1": { "color": "green", "text": "Up" }, "2": { "color": "red", "text": "Down" }, "3": { "color": "orange", "text": "Testing" }, "5": { "color": "blue", "text": "Dormant" } }, "type": "value" }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "gray", "value": null }] }
+        }
+      },
+      "gridPos": { "h": 6, "w": 24, "x": 0, "y": 19 },
+      "id": 20,
+      "options": { "alignValue": "center", "legend": { "showLegend": false }, "mergeValues": true, "rowHeight": 0.8, "showValue": "never", "tooltip": { "mode": "single" } },
+      "targets": [{ "expr": "ifOperStatus{job=\"cisco_snmp\", instance=\"$instance\", ifIndex=~\"$ifindex\"}\n* on(instance, ifIndex) group_left(ifDescr)\n(ifDescr{job=\"cisco_snmp\", instance=\"$instance\"} * 0 + 1)", "legendFormat": "{{ ifDescr }}", "refId": "A" }],
+      "title": "Interface Status",
+      "type": "state-timeline"
+    },
+    {
+      "collapsed": true,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 },
+      "id": 30,
+      "panels": [
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": { "drawStyle": "line", "fillOpacity": 20, "lineWidth": 1, "showPoints": "never", "spanNulls": false },
+              "min": 0,
+              "unit": "pps"
+            }
+          },
+          "gridPos": { "h": 6, "w": 12, "x": 0, "y": 26 },
+          "id": 31,
+          "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "right" }, "tooltip": { "mode": "multi", "sort": "desc" } },
+          "targets": [{ "expr": "rate(ifInErrors{job=\"cisco_snmp\", instance=\"$instance\", ifIndex=~\"$ifindex\"}[$__rate_interval])\n* on(instance, ifIndex) group_left(ifDescr)\n(ifDescr{job=\"cisco_snmp\", instance=\"$instance\"} * 0 + 1)", "legendFormat": "{{ ifDescr }}", "refId": "A" }],
+          "title": "Input Errors",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": { "drawStyle": "line", "fillOpacity": 20, "lineWidth": 1, "showPoints": "never", "spanNulls": false },
+              "min": 0,
+              "unit": "pps"
+            }
+          },
+          "gridPos": { "h": 6, "w": 12, "x": 12, "y": 26 },
+          "id": 32,
+          "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "right" }, "tooltip": { "mode": "multi", "sort": "desc" } },
+          "targets": [{ "expr": "rate(ifOutErrors{job=\"cisco_snmp\", instance=\"$instance\", ifIndex=~\"$ifindex\"}[$__rate_interval])\n* on(instance, ifIndex) group_left(ifDescr)\n(ifDescr{job=\"cisco_snmp\", instance=\"$instance\"} * 0 + 1)", "legendFormat": "{{ ifDescr }}", "refId": "A" }],
+          "title": "Output Errors",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": { "drawStyle": "line", "fillOpacity": 20, "lineWidth": 1, "showPoints": "never", "spanNulls": false },
+              "max": 100,
+              "min": 0,
+              "unit": "percent"
+            },
+            "overrides": [
+              { "matcher": { "id": "byName", "options": "5 sec" }, "properties": [{ "id": "color", "value": { "fixedColor": "red", "mode": "fixed" } }] },
+              { "matcher": { "id": "byName", "options": "1 min" }, "properties": [{ "id": "color", "value": { "fixedColor": "orange", "mode": "fixed" } }] },
+              { "matcher": { "id": "byName", "options": "5 min" }, "properties": [{ "id": "color", "value": { "fixedColor": "green", "mode": "fixed" } }] }
+            ]
+          },
+          "gridPos": { "h": 6, "w": 8, "x": 0, "y": 32 },
+          "id": 33,
+          "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+          "targets": [
+            { "expr": "avg(ciscoCpu5sec{job=\"cisco_snmp\", instance=\"$instance\"})", "legendFormat": "5 sec", "refId": "A" },
+            { "expr": "avg(ciscoCpu1min{job=\"cisco_snmp\", instance=\"$instance\"})", "legendFormat": "1 min", "refId": "B" },
+            { "expr": "avg(ciscoCpu5min{job=\"cisco_snmp\", instance=\"$instance\"})", "legendFormat": "5 min", "refId": "C" }
+          ],
+          "title": "CPU History",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": { "drawStyle": "line", "fillOpacity": 20, "lineWidth": 1, "showPoints": "never", "spanNulls": false },
+              "max": 100,
+              "min": 0,
+              "unit": "percent"
+            }
+          },
+          "gridPos": { "h": 6, "w": 8, "x": 8, "y": 32 },
+          "id": 34,
+          "options": { "legend": { "calcs": ["lastNotNull"], "displayMode": "list", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+          "targets": [{ "expr": "100 * ciscoMemPoolUsed{job=\"cisco_snmp\", instance=\"$instance\"} / (ciscoMemPoolUsed{job=\"cisco_snmp\", instance=\"$instance\"} + ciscoMemPoolFree{job=\"cisco_snmp\", instance=\"$instance\"})", "legendFormat": "Pool {{ ciscoMemoryPoolType }}", "refId": "A" }],
+          "title": "Memory History",
+          "type": "timeseries"
+        },
+        {
+          "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+          "description": "Temperature sensors with threshold lines",
+          "fieldConfig": {
+            "defaults": {
+              "color": { "mode": "palette-classic" },
+              "custom": { "drawStyle": "line", "fillOpacity": 10, "lineWidth": 2, "showPoints": "never", "spanNulls": false },
+              "thresholds": { "mode": "absolute", "steps": [{ "color": "green", "value": null }, { "color": "yellow", "value": 50 }, { "color": "orange", "value": 65 }, { "color": "red", "value": 80 }] },
+              "unit": "celsius"
+            }
+          },
+          "gridPos": { "h": 6, "w": 8, "x": 16, "y": 32 },
+          "id": 35,
+          "options": { "legend": { "calcs": ["lastNotNull", "max"], "displayMode": "table", "placement": "bottom" }, "tooltip": { "mode": "multi" } },
+          "targets": [
+            { 
+              "expr": "ciscoEnvMonTemperatureStatusValue{job=\"cisco_snmp\", instance=\"$instance\"}\n* on(instance, ciscoEnvMonTemperatureStatusIndex) group_left(ciscoEnvMonTemperatureStatusDescr)\n(ciscoEnvMonTemperatureStatusDescr{job=\"cisco_snmp\", instance=\"$instance\"} * 0 + 1)", 
+              "legendFormat": "{{ ciscoEnvMonTemperatureStatusDescr }}", 
+              "refId": "A" 
+            }
+          ],
+          "title": "Temperature Sensors",
+          "type": "timeseries"
+        }
+      ],
+      "title": "📊 Details",
+      "type": "row"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["cisco", "snmp", "network"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "definition": "label_values(up{job=\"cisco_snmp\"}, instance)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Switch",
+        "multi": false,
+        "name": "instance",
+        "query": "label_values(up{job=\"cisco_snmp\"}, instance)",
+        "refresh": 1,
+        "sort": 1,
+        "type": "query"
+      },
+      {
+        "allValue": ".+",
+        "current": {},
+        "datasource": { "type": "prometheus", "uid": "${DS_PROMETHEUS}" },
+        "definition": "label_values(ifDescr{job=\"cisco_snmp\", instance=\"$instance\"}, ifIndex)",
+        "hide": 0,
+        "includeAll": true,
+        "label": "Interface",
+        "multi": true,
+        "name": "ifindex",
+        "query": "label_values(ifDescr{job=\"cisco_snmp\", instance=\"$instance\"}, ifIndex)",
+        "refresh": 1,
+        "sort": 3,
+        "type": "query"
+      }
+    ]
+  },
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Cisco Switch",
+  "uid": "cisco-switch-final",
+  "version": 1
+}
