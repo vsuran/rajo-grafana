@@ -4,7 +4,7 @@ global:
   smtp_from: monitoring@example.com
   smtp_auth_username: monitoring@example.com
   smtp_auth_password: REPLACE_WITH_APP_PASSWORD
-  slack_api_url: https://hooks.slack.com/services/T00000000/B00000000/XXXXXXXXXXXXXXXXXXXXXXXX
+  slack_api_url: 
 
 route:
   receiver: primary
