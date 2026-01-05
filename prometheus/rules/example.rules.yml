@@ -1,0 +1,31 @@
+groups:
+  - name: general
+    rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Instance {{ $labels.instance }} down'
+          description: '{{ $labels.instance }} of job {{ $labels.job }} has been unreachable for 5 minutes.'
+
+      - alert: PrometheusRuleEvaluationFailing
+        expr: increase(prometheus_rule_evaluation_failures_total[5m]) > 0
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Prometheus rule evaluations are failing'
+          description: 'Prometheus has recorded {{ $value }} rule evaluation failures over the past 5 minutes.'
+
+  - name: network_exporters
+    rules:
+      - alert: CiscoSnmpTargetDown
+        expr: up{job="cisco_snmp"} == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Cisco SNMP target {{ $labels.instance }} down'
+          description: '{{ $labels.instance }} (Cisco SNMP) has not responded to scrapes for 10 minutes.'

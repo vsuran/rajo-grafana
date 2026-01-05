@@ -4,6 +4,7 @@ import subprocess
 import yaml
 import re
 import sys
+from pathlib import Path
 
 # ========================
 # CONFIG
@@ -18,7 +19,8 @@ SNMP_COMMUNITY = "public"
 SNMP_VERSION = "2c"
 SNMP_TIMEOUT = 2
 
-OUTPUT_FILE = "/etc/prometheus/targets/cisco-switches.yml"
+REPO_ROOT = Path(__file__).resolve().parent.parent
+OUTPUT_FILE = REPO_ROOT / "prometheus" / "targets" / "cisco-switches.yml"
 
 DEFAULT_LABELS = {
     "job": "cisco_snmp",
@@ -90,6 +92,7 @@ for subnet in SUBNETS:
             })
 
 if targets:
+    OUTPUT_FILE.parent.mkdir(parents=True, exist_ok=True)
     with open(OUTPUT_FILE, "w") as f:
         yaml.safe_dump(targets, f, default_flow_style=False)
 

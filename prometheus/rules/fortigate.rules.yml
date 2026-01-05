@@ -1,0 +1,58 @@
+# Alerts specific to Fortigate firewalls scraped by vladosur/fortigate-exporter.
+# Adjust metric names/thresholds if your exporter differs.
+groups:
+  - name: fortigate_health
+    rules:
+      - alert: FortigateExporterProbeFailed
+        expr: probe_success{job="fortigate"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Fortigate target {{ $labels.instance }} unreachable'
+          description: 'The Fortigate exporter failed to probe {{ $labels.instance }} for at least 2 minutes.'
+
+      - alert: FortigateHighCpuUsage
+        expr: fortigate_system_cpu_usage_percent{job="fortigate"} > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Fortigate {{ $labels.instance }} CPU above 85%'
+          description: 'CPU usage on {{ $labels.instance }} has stayed above 85% for 5 minutes.'
+
+      - alert: FortigateHighMemoryUsage
+        expr: fortigate_system_memory_usage_percent{job="fortigate"} > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Fortigate {{ $labels.instance }} memory over 85%'
+          description: 'Memory utilization on {{ $labels.instance }} exceeded 85% for at least 5 minutes.'
+
+      - alert: FortigateHighSessionUtilization
+        expr: fortigate_sessions_active{job="fortigate"} / clamp_min(fortigate_sessions_capacity{job="fortigate"}, 1) > 0.9
+        for: 10m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Fortigate {{ $labels.instance }} session utilization above 90%'
+          description: 'Active firewall sessions ({{ $value | humanizePercentage }}) exceeded 90% of capacity on {{ $labels.instance }}.'
+
+      - alert: FortigateHighTemperature
+        expr: fortigate_hw_sensor_temperature_celsius{job="fortigate", sensor!~"(?i)fan|psu"} > 75
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Fortigate {{ $labels.instance }} temperature high on {{ $labels.sensor }}'
+          description: 'Temperature sensor {{ $labels.sensor }} on {{ $labels.instance }} has reported >75°C for 10 minutes.'
+
+      - alert: FortigateLicenseExpiringSoon
+        expr: fortigate_license_days_remaining{job="fortigate"} < 30
+        for: 0m
+        labels:
+          severity: info
+        annotations:
+          summary: 'Fortigate {{ $labels.instance }} license expires soon'
+          description: 'License remaining days on {{ $labels.instance }} is down to {{ $value | humanize }} days (threshold 30).'

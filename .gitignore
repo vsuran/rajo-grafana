@@ -1,0 +1,6 @@
+.terraform/
+*.tfstate
+*.tfstate.*
+infra/lambda_alert_router.zip
+__pycache__/
+infra/.terraform.lock.hcl

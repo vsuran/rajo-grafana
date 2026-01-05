@@ -1,0 +1,6 @@
+# Sample Fortigate credentials file
+# Replace values with actual credentials before running the stack.
+---
+targets:
+  - host: fortigate.example.com
+    api_key: REPLACE_ME

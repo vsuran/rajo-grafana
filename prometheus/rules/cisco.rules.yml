@@ -1,0 +1,48 @@
+# Alerts for Cisco switches discovered via SNMP exporter.
+groups:
+  - name: cisco_switch_health
+    rules:
+      - alert: CiscoSnmpTargetDown
+        expr: up{job="cisco_snmp"} == 0
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Cisco SNMP target {{ $labels.instance }} unreachable'
+          description: '{{ $labels.instance }} has not responded to snmp_exporter scrapes for 10 minutes.'
+
+      - alert: CiscoHighCpuUsage
+        expr: (1 - avg by (instance) (rate(cisco_cpu_idle_seconds_total{job="cisco_snmp"}[5m]))) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Cisco switch {{ $labels.instance }} CPU > 85%'
+          description: 'Average CPU utilization exceeded 85% for 5 minutes.'
+
+      - alert: CiscoHighMemoryUsage
+        expr: cisco_memory_pool_used_bytes{job="cisco_snmp"} / clamp_min(cisco_memory_pool_free_bytes{job="cisco_snmp"} + cisco_memory_pool_used_bytes{job="cisco_snmp"}, 1) > 0.85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Cisco switch {{ $labels.instance }} memory > 85%'
+          description: 'Memory utilization stayed above 85% for at least 5 minutes.'
+
+      - alert: CiscoInterfaceDown
+        expr: (ifOperStatus{job="cisco_snmp"} == 2) and (ifAdminStatus{job="cisco_snmp"} == 1)
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Cisco interface {{ $labels.instance }} {{ $labels.ifDescr }} is down'
+          description: 'Admin up/oper down condition persisted for 10 minutes.'
+
+      - alert: CiscoInterfaceErrors
+        expr: rate(ifInErrors{job="cisco_snmp"}[5m]) + rate(ifOutErrors{job="cisco_snmp"}[5m]) > 50
+        for: 5m
+        labels:
+          severity: info
+        annotations:
+          summary: 'Cisco interface {{ $labels.instance }} {{ $labels.ifDescr }} has high error rate'
+          description: 'Input+output errors exceeded 50 packets/s for 5 minutes.'
