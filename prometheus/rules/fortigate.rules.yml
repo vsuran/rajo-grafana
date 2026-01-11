@@ -56,3 +56,30 @@ groups:
         annotations:
           summary: 'Fortigate {{ $labels.instance }} license expires soon'
           description: 'License remaining days on {{ $labels.instance }} is down to {{ $value | humanize }} days (threshold 30).'
+
+      - alert: FortigateHaMemberDown
+        expr: fortigate_ha_member_state{job="fortigate"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Fortigate HA member {{ $labels.member }} down'
+          description: 'HA member {{ $labels.member }} on cluster {{ $labels.instance }} has been down for 5 minutes.'
+
+      - alert: FortigateSessionDropsHigh
+        expr: rate(fortigate_sessions_dropped_total{job="fortigate"}[5m]) > 100
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Fortigate {{ $labels.instance }} session drops high'
+          description: '{{ $value | humanize }} sessions per second dropped on {{ $labels.instance }} for 5 minutes.'
+
+      - alert: FortigateVpnTunnelDown
+        expr: fortigate_vpn_tunnel_state{job="fortigate"} == 0
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'Fortigate VPN tunnel {{ $labels.tunnel }} down'
+          description: 'VPN tunnel {{ $labels.tunnel }} on {{ $labels.instance }} has been down for 5 minutes.'

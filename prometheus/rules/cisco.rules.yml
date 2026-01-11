@@ -46,3 +46,12 @@ groups:
         annotations:
           summary: 'Cisco interface {{ $labels.instance }} {{ $labels.ifDescr }} has high error rate'
           description: 'Input+output errors exceeded 50 packets/s for 5 minutes.'
+
+      - alert: CiscoHighTemperature
+        expr: cisco_envmon_temperature_value_celsius{job="cisco_snmp"} > 75
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: 'Cisco switch {{ $labels.instance }} temperature high on {{ $labels.sensor }}'
+          description: 'Temperature sensor {{ $labels.sensor }} reported over 75°C for 10 minutes on {{ $labels.instance }}.'

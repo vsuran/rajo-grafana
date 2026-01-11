@@ -36,3 +36,33 @@ Monitoring stack for Fortigate and Cisco SNMP devices powered by Prometheus, Gra
 5. Start the stack: `docker compose up -d`.
 
 Grafana provisions the default Prometheus datasource plus any dashboards placed in `grafana/dashboards/`. Update the provisioning files under `grafana/provisioning/` if you add additional datasources or folders.
+
+## Triggering Test Alerts
+
+Send synthetic alerts directly to Alertmanager to verify email/SNS paths:
+
+```bash
+# Warning severity (tests SES email path)
+curl -XPOST http://localhost:9093/api/v2/alerts \
+  -H 'Content-Type: application/json' \
+  -d '[
+        {
+          "labels": {"alertname": "EmailTest", "severity": "warning"},
+          "annotations": {"summary": "Testing email delivery"},
+          "startsAt": "'$(date -Iseconds)'"
+        }
+      ]'
+
+# Critical severity (tests API Gateway -> Lambda -> SNS path)
+curl -XPOST http://localhost:9093/api/v2/alerts \
+  -H 'Content-Type: application/json' \
+  -d '[
+        {
+          "labels": {"alertname": "CriticalTest", "severity": "critical"},
+          "annotations": {"summary": "Testing SMS delivery"},
+          "startsAt": "'$(date -Iseconds)'"
+        }
+      ]'
+```
+
+Each call returns `{"status":"success"}` and should trigger the configured receivers. Use `docker compose logs -f alertmanager` plus AWS SES/SNS dashboards to confirm delivery.

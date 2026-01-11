@@ -1,5 +1,9 @@
 global:
   resolve_timeout: 5m
+  smtp_smarthost: email-smtp.eu-west-1.amazonaws.com:587
+  smtp_from: alert@vladosur.cc
+  smtp_auth_username: AKIAVTKHB63JL44YBSX7
+  smtp_auth_password: 
 
 route:
   receiver: api_gateway
@@ -7,7 +11,11 @@ route:
   group_wait: 30s
   group_interval: 5m
   repeat_interval: 3h
-  routes: []
+  routes:
+    - receiver: email_warnings
+      matchers:
+        - severity="warning"
+      continue: true
 
 receivers:
   - name: api_gateway
@@ -16,6 +24,12 @@ receivers:
         send_resolved: true
         http_config:
           follow_redirects: false
+  - name: email_warnings
+    email_configs:
+      - to: 'suranovsky.vladimir@gmail.com'
+        send_resolved: true
+      - to: 'milek@acsnet.sk'
+        send_resolved: true
 
 inhibit_rules:
   - source_matchers:
