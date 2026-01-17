@@ -52,6 +52,41 @@ Terraform configuration to provision the Alertmanager → API Gateway → Lambda
      "87.197.129.110",
    ]
    ```
+   To manage SMS recipients via Parameter Store, create a StringList parameter and point Terraform at it:
+   ```bash
+   aws ssm put-parameter \
+     --name "/alerts/sms/recipients" \
+     --type "StringList" \
+     --value "+421903322606,+421903111222" \
+     --overwrite
+   ```
+   Then add to `terraform.tfvars`:
+   ```hcl
+   sms_recipients_parameter_name = "/alerts/sms/recipients"
+   sms_recipients_topic_key      = "sms_critical"
+   ```
+   Or define recipients directly in Terraform (and optionally store them in SSM if `sms_recipients_parameter_name` is set):
+   ```hcl
+   sms_recipients = [
+     "+421903322606",
+     "+421903111222",
+   ]
+   ```
+   To throttle API Gateway and avoid SMS floods, set rate/burst limits (example: 1 request per 90 seconds):
+   ```hcl
+   api_throttle_rate_limit  = 0.0111111111
+   api_throttle_burst_limit = 1
+   ```
+   To require an API key (and enforce usage plan throttling/quota), set:
+   ```hcl
+   api_key_name            = "alert-router-key"
+   api_usage_plan_name     = "alert-router-plan"
+   api_usage_plan_rate_limit  = 0.0111111111
+   api_usage_plan_burst_limit = 1
+   api_usage_plan_quota_limit = 100
+   api_usage_plan_quota_period = "DAY"
+   api_key_ssm_parameter_name = "/alerts/api/key"
+   ```
    Set `aws_profile` to any profile defined in your `~/.aws/credentials`/`config` files (or leave blank to use the default credential chain/environment variables).
 3. Initialize and apply:
    ```bash

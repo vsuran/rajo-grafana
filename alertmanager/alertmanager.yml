@@ -24,6 +24,8 @@ receivers:
         send_resolved: true
         http_config:
           follow_redirects: false
+          headers:
+            x-api-key: "${ALERT_ROUTER_API_KEY}"
   - name: email_warnings
     email_configs:
       - to: 'suranovsky.vladimir@gmail.com'

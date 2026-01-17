@@ -14,6 +14,7 @@ TOPIC_ARN = os.environ["SNS_TOPIC_ARN"]
 
 
 def _build_message(alerts, status):
+    header = "ACSNET_ALERT"
     lines = []
     for alert in alerts:
         labels = alert.get("labels") or {}
@@ -25,9 +26,9 @@ def _build_message(alerts, status):
         lines.append(" ".join(pieces))
 
     if lines:
-        return f"[{status.upper()}] " + " | ".join(lines)
+        return f"{header} [{status.upper()}] " + " | ".join(lines)
 
-    return f"[{status.upper()}] Alert received"
+    return f"{header} [{status.upper()}] Alert received"
 
 
 def handler(event, context):

@@ -18,6 +18,7 @@ resource "aws_api_gateway_method" "alerts_post" {
   resource_id   = aws_api_gateway_resource.alerts.id
   http_method   = "POST"
   authorization = "NONE"
+  api_key_required = true
 }
 
 resource "aws_api_gateway_integration" "alerts_post" {
@@ -56,10 +57,64 @@ resource "aws_api_gateway_stage" "alert_router" {
   tags         = local.default_tags
 }
 
+resource "aws_api_gateway_method_settings" "alerts_throttle" {
+  rest_api_id = aws_api_gateway_rest_api.alert_router.id
+  stage_name  = aws_api_gateway_stage.alert_router.stage_name
+  method_path = "alerts/POST"
+
+  settings {
+    throttling_rate_limit  = var.api_throttle_rate_limit
+    throttling_burst_limit = var.api_throttle_burst_limit
+  }
+}
+
 resource "aws_lambda_permission" "apigw_invoke" {
   statement_id  = "AllowAPIGatewayInvoke"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.alert_router.function_name
   principal     = "apigateway.amazonaws.com"
   source_arn    = "${aws_api_gateway_rest_api.alert_router.execution_arn}/*/POST/alerts"
+}
+
+resource "aws_api_gateway_api_key" "alert_router" {
+  name    = var.api_key_name
+  enabled = true
+  value   = var.api_key_value != "" ? var.api_key_value : null
+
+  tags = local.default_tags
+}
+
+resource "aws_api_gateway_usage_plan" "alert_router" {
+  name = var.api_usage_plan_name
+
+  api_stages {
+    api_id = aws_api_gateway_rest_api.alert_router.id
+    stage  = aws_api_gateway_stage.alert_router.stage_name
+  }
+
+  throttle_settings {
+    rate_limit  = var.api_usage_plan_rate_limit
+    burst_limit = var.api_usage_plan_burst_limit
+  }
+
+  quota_settings {
+    limit  = var.api_usage_plan_quota_limit
+    period = var.api_usage_plan_quota_period
+  }
+
+  tags = local.default_tags
+}
+
+resource "aws_api_gateway_usage_plan_key" "alert_router" {
+  key_id        = aws_api_gateway_api_key.alert_router.id
+  key_type      = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.alert_router.id
+}
+
+resource "aws_ssm_parameter" "api_key" {
+  name        = var.api_key_ssm_parameter_name
+  type        = "SecureString"
+  value       = aws_api_gateway_api_key.alert_router.value
+  overwrite   = true
+  description = "API Gateway key for alert-router"
 }
