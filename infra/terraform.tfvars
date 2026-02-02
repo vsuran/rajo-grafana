@@ -23,6 +23,7 @@ sms_default_type = "Transactional"
 sms_recipients = [
   "+421903322606",
   "+421902106186",
+  "+421905457678"
 ]
 
 api_throttle_rate_limit  = 0.0111111111
